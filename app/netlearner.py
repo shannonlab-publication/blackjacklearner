@@ -53,7 +53,7 @@ class DQNLearner(Learner):
     def update(self,new_state,reward):
         if self._learning:
             rewards = self._model.predict([np.array([new_state])], batch_size=1)
-            maxQ = rewards[0][0] if rewards[0][0] > rewards[0][1] else rewards[0][1]
+            maxQ = np.max(rewards[0])
             new = self._discount * maxQ
 
             if self._last_action == Constants.hit:
@@ -67,7 +67,7 @@ class DQNLearner(Learner):
     def get_optimal_strategy(self):
 
         index = []
-        for x in range(0,21):
+        for x in range(1,22):
             for y in range(1,11):
                 index.append((x,y))
 
@@ -81,4 +81,3 @@ class DQNLearner(Learner):
 
         df['optimal'] = df.apply(lambda x : 'hit' if x['hit'] >= x['stay'] else 'stay', axis=1)
         return df
-

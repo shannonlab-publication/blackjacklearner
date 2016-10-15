@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from app.player import Player
 from app.constants import Constants
 from app.netlearner import DQNLearner
@@ -7,53 +8,58 @@ import numpy as np
 
 class Game:
     def __init__(self, num_learning_rounds, learner = None, report_every=100):
-        self.p = learner
-        self.win = 0
-        self.loss = 0
-        self.game = 1
-        self._num_learning_rounds = num_learning_rounds
-        self._report_every = report_every
+        self.p = learner #p = 学習するプレイヤー
+        self.win = 0 #勝利の数
+        self.loss = 0 #負けの数
+        self.game = 1 #ゲームの数
+        self._num_learning_rounds = num_learning_rounds #学習回数
+        self._report_every = report_every #学習経過報告何ターンごとにするか
 
     def run(self):
-        d, p, p2, winner = self.reset_round()
 
+        # リセット
+        d, p, p2, winner = self.reset_round()
+        # 状態(Q-learningにおけるS)の取得 もともとの状態では
+        # p1とp2(特例あり)の手札のポイントの順列がSとなる
         state = self.get_starting_state(p,p2)
 
         while True:
-            p1_action = p.get_action(state)
-            p2_action = p2.get_action(state)
 
-            if p1_action == Constants.hit:
-                p.hit(d)
+            while True:
+                state = self.get_state(p, None, p2)
+                p1_action = p.get_action(state)
+                if p1_action == Constants.hit:
+                    p.hit(d)
+                    state = self.get_state(p, None, p2)
+                    p.update(self.get_state(p,p1_action,p2),0)
+                if p1_action == Constants.stay:
+                    break            
+                if self.determine_if_bust(p):
+                    winner = Constants.player2
+                    break
 
-            if p2_action == Constants.hit:
-                p2.hit(d)
+            # ディーラーのアクション定義
+            while winner == None:
+                p2_action = p2.get_action(state)
+                if p2_action == Constants.hit:
+                    p2.hit(d)
+                if p2_action == Constants.stay:
+                    break
 
-            if self.determine_if_bust(p):
-                winner = Constants.player2
-                break
-
-            elif self.determine_if_bust(p2):
+            if self.determine_if_bust(p2):
                 winner = Constants.player1
-                break
-
-            if p1_action == p2_action and p1_action == Constants.stay:
-                break
-
-            state = self.get_state(p, p1_action, p2)
-            p.update(state,0)
-
+            
+            break
 
         if winner is None:
             winner = self.determine_winner(p,p2)
 
-
         if winner == Constants.player1:
             self.win += 1
-            p.update(self.get_ending_state(p,p1_action,p2),1)
+            p.update(self.get_state(p,p1_action,p2),1)
         else:
             self.loss += 1
-            p.update(self.get_ending_state(p,p1_action,p2),-1)
+            p.update(self.get_state(p,p1_action,p2),-1)
 
         self.game += 1
 
@@ -116,11 +122,10 @@ class Deck:
         self.shuffle()
 
     def shuffle(self):
-        cards = (np.arange(0,10) + 1)
+        cards = np.arange(1,14)
         cards = np.repeat(cards,4*3) #4 suits x 3 decks
         np.random.shuffle(cards)
         self._cards = cards.tolist()
 
     def draw(self):
         return self._cards.pop()
-

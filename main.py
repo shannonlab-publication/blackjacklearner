@@ -4,7 +4,7 @@ from app.qlearner import Learner
 
 
 def main():
-    num_learning_rounds = 20000
+    num_learning_rounds = 40000
     game = Game(num_learning_rounds, DQNLearner()) #Deep Q Network Learner
     #game = Game(num_learning_rounds, Learner()) #Q learner
     number_of_test_rounds = 1000
