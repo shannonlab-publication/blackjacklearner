@@ -13,7 +13,8 @@ periodically, and the win/loss ratio is reported in the same manner. The optimal
 
 Has been tested using Keras 0.3.2 and 0.3.3 using Theano 0.8.2 on Python 3.4.
 
+---
 
-Pythonプログラミングのツボとコツがゼッタイにわかる本
-Shannon Lab株式会社 (著)
-秀和システム（出版）
+Pythonプログラミングのツボとコツがゼッタイにわかる本  
+Shannon Lab株式会社 (著)  
+秀和システム（出版）  
